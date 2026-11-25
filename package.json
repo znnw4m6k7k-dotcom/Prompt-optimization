@@ -1,0 +1,70 @@
+{
+  "name": "prompt-refinery",
+  "version": "0.1.0",
+  "description": "A model-agnostic prompt compiler for desktop AI agents, with CLI, HTTP and MCP interfaces.",
+  "type": "module",
+  "bin": {
+    "prompt-refinery": "bin/prompt-refinery.js",
+    "prfy": "bin/prompt-refinery.js"
+  },
+  "exports": {
+    ".": "./src/index.js",
+    "./mcp": "./src/mcp.js",
+    "./server": "./src/server.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "schemas",
+    "openapi",
+    "docs",
+    "examples",
+    "evals",
+    "packaging",
+    "scripts",
+    "AGENTS.md",
+    "PROJECT_PLAN.zh-CN.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "CODE_OF_CONDUCT.md",
+    "SECURITY.md",
+    "SECURITY.zh-CN.md",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test",
+    "test:coverage": "node --test --experimental-test-coverage",
+    "eval": "node scripts/eval.js",
+    "check": "node --check bin/prompt-refinery.js && node --check src/cli.js && node --check src/server.js && node --check src/mcp.js",
+    "prepublishOnly": "npm test && npm run check"
+  },
+  "keywords": [
+    "prompt-engineering",
+    "prompt-enhancement",
+    "mcp",
+    "ai-agent",
+    "cli",
+    "openai",
+    "ollama",
+    "claude"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/znnw4m6k7k-dotcom/Prompt-optimization.git"
+  },
+  "bugs": {
+    "url": "https://github.com/znnw4m6k7k-dotcom/Prompt-optimization/issues"
+  },
+  "homepage": "https://github.com/znnw4m6k7k-dotcom/Prompt-optimization#readme"
+}

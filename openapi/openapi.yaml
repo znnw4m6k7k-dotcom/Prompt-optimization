@@ -1,0 +1,272 @@
+openapi: 3.1.0
+info:
+  title: Prompt Refinery API
+  version: 0.1.0
+  description: >
+    Local-first HTTP API for rewriting rough requests into executable prompts.
+    Bind to loopback by default. If the service is exposed to a network, configure
+    PROMPT_REFINERY_SERVER_TOKEN and put it behind a reverse proxy with TLS.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: http://127.0.0.1:4317
+    description: Local default
+tags:
+  - name: enhance
+  - name: meta
+paths:
+  /healthz:
+    get:
+      tags: [meta]
+      operationId: health
+      summary: Liveness probe
+      security: []
+      responses:
+        "200":
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, const: ok }
+                  version: { type: string }
+                  provider: { type: string }
+  /v1/capabilities:
+    get:
+      tags: [meta]
+      operationId: capabilities
+      summary: Discover targets, modes, provider, and limits
+      responses:
+        "200":
+          description: Capability document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Capabilities"
+  /v1/enhance:
+    post:
+      tags: [enhance]
+      operationId: enhancePrompt
+      summary: Rewrite a rough request into an executable prompt
+      description: >
+        The endpoint only rewrites the prompt. It does not execute the task,
+        access the workspace, or call other tools.
+      parameters:
+        - name: x-request-id
+          in: header
+          required: false
+          schema: { type: string, maxLength: 128 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnhanceRequest"
+            examples:
+              zh:
+                value:
+                  prompt: 把这份推广费用表分析一下，写份报告给领导汇报
+                  target: data
+                  mode: fast
+                  locale: zh-CN
+              en:
+                value:
+                  prompt: Analyze the attached campaign spend and write an executive report.
+                  target: data
+                  mode: balanced
+                  locale: en
+      responses:
+        "200":
+          description: Enhanced prompt and quality metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnhanceResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "413":
+          $ref: "#/components/responses/TooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "502":
+          $ref: "#/components/responses/ProviderFailure"
+  /openapi.yaml:
+    get:
+      tags: [meta]
+      operationId: openapi
+      summary: This document
+      security: []
+      responses:
+        "200":
+          description: OpenAPI YAML
+          content:
+            application/yaml:
+              schema: { type: string }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Required only when a server token is configured.
+  schemas:
+    EnhanceRequest:
+      type: object
+      additionalProperties: false
+      required: [prompt]
+      properties:
+        prompt:
+          type: string
+          minLength: 1
+          maxLength: 20000
+        target:
+          type: string
+          enum: [auto, general, code, writing, research, agent, data, image]
+          default: auto
+        mode:
+          type: string
+          enum: [fast, balanced, quality]
+          default: fast
+        locale:
+          type: string
+          enum: [auto, zh-CN, en]
+          default: auto
+        maxChars:
+          type: integer
+          minimum: 500
+          maximum: 60000
+          default: 12000
+    EnhanceResponse:
+      type: object
+      required:
+        [requestId, enhancedPrompt, changes, assumptions, questions, provider, model, mode, quality, meta]
+      properties:
+        requestId: { type: string }
+        enhancedPrompt: { type: string }
+        changes:
+          type: array
+          items: { type: string }
+        assumptions:
+          type: array
+          items: { type: string }
+        questions:
+          type: array
+          items: { type: string }
+        provider: { type: string }
+        model: { type: string }
+        mode:
+          type: string
+          enum: [fast, balanced, quality]
+        quality:
+          $ref: "#/components/schemas/Quality"
+        meta:
+          $ref: "#/components/schemas/Meta"
+    Quality:
+      type: object
+      required: [score, band, dimensions, warnings]
+      properties:
+        score: { type: number, minimum: 0, maximum: 100 }
+        band:
+          type: string
+          enum: [excellent, good, fair, weak]
+        dimensions:
+          type: array
+          items:
+            type: object
+            required: [id, label, score, max, note]
+            properties:
+              id: { type: string }
+              label: { type: string }
+              score: { type: number }
+              max: { type: number }
+              note: { type: string }
+        warnings:
+          type: array
+          items: { type: string }
+    Meta:
+      type: object
+      required: [version, target, locale, complexity, missing, durationMs, warnings]
+      properties:
+        version: { type: string }
+        target: { type: string }
+        locale: { type: string }
+        complexity: { type: number }
+        missing:
+          type: array
+          items: { type: string }
+        durationMs: { type: number }
+        usage:
+          type: [object, "null"]
+          properties:
+            inputTokens: { type: [number, "null"] }
+            outputTokens: { type: [number, "null"] }
+            totalTokens: { type: [number, "null"] }
+        degraded: { type: boolean }
+        warnings:
+          type: array
+          items: { type: string }
+    Capabilities:
+      type: object
+      properties:
+        name: { type: string }
+        version: { type: string }
+        targets:
+          type: array
+          items: { type: string }
+        modes:
+          type: array
+          items: { type: string }
+        provider: { type: string }
+        model: { type: string }
+        maxBodyBytes: { type: integer }
+        endpoints:
+          type: array
+          items: { type: string }
+    Error:
+      type: object
+      required: [error, requestId]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            details: {}
+        requestId: { type: string }
+  responses:
+    BadRequest:
+      description: Invalid input
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Missing or invalid bearer token
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    TooLarge:
+      description: Request body or prompt too large
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    UnsupportedMediaType:
+      description: Content-Type must be application/json
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    ProviderFailure:
+      description: Upstream model provider failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+security:
+  - bearerAuth: []

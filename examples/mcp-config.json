@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "prompt-refinery": {
+      "command": "npx",
+      "args": ["-y", "prompt-refinery", "mcp"],
+      "env": {
+        "PROMPT_REFINERY_PROVIDER": "heuristic"
+      }
+    }
+  }
+}

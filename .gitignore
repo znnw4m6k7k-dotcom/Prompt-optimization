@@ -1,0 +1,10 @@
+node_modules/
+coverage/
+*.tgz
+.DS_Store
+.env
+.env.*
+!.env.example
+mcp-output.jsonl
+.ci-missing-config.json
+npm-debug.log*

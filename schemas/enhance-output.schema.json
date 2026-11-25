@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prompt-refinery.dev/schemas/enhance-output.schema.json",
+  "title": "Prompt Refinery enhance response",
+  "type": "object",
+  "required": [
+    "requestId",
+    "enhancedPrompt",
+    "changes",
+    "assumptions",
+    "questions",
+    "provider",
+    "model",
+    "mode",
+    "quality",
+    "meta"
+  ],
+  "properties": {
+    "requestId": { "type": "string" },
+    "enhancedPrompt": { "type": "string" },
+    "changes": { "type": "array", "items": { "type": "string" } },
+    "assumptions": { "type": "array", "items": { "type": "string" } },
+    "questions": { "type": "array", "items": { "type": "string" } },
+    "provider": { "type": "string" },
+    "model": { "type": "string" },
+    "mode": { "type": "string", "enum": ["fast", "balanced", "quality"] },
+    "quality": {
+      "type": "object",
+      "required": ["score", "band", "dimensions", "warnings"],
+      "properties": {
+        "score": { "type": "number", "minimum": 0, "maximum": 100 },
+        "band": { "type": "string", "enum": ["excellent", "good", "fair", "weak"] },
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "label", "score", "max", "note"],
+            "properties": {
+              "id": { "type": "string" },
+              "label": { "type": "string" },
+              "score": { "type": "number" },
+              "max": { "type": "number" },
+              "note": { "type": "string" }
+            }
+          }
+        },
+        "warnings": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "required": ["version", "target", "locale", "complexity", "missing", "durationMs", "warnings"],
+      "properties": {
+        "version": { "type": "string" },
+        "target": { "type": "string" },
+        "locale": { "type": "string" },
+        "complexity": { "type": "number" },
+        "missing": { "type": "array", "items": { "type": "string" } },
+        "durationMs": { "type": "number" },
+        "usage": {
+          "type": ["object", "null"],
+          "properties": {
+            "inputTokens": { "type": ["number", "null"] },
+            "outputTokens": { "type": ["number", "null"] },
+            "totalTokens": { "type": ["number", "null"] }
+          }
+        },
+        "degraded": { "type": "boolean" },
+        "warnings": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

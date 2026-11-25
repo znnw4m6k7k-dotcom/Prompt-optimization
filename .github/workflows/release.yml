@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      PROMPT_REFINERY_PROVIDER: heuristic
+      PROMPT_REFINERY_CONFIG: ${{ github.workspace }}/.ci-missing-config.json
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run check
+      - run: npm run eval
+      - name: Pack
+        id: pack
+        run: |
+          npm pack
+          echo "tarball=$(ls prompt-refinery-*.tgz | head -1)" >> "$GITHUB_OUTPUT"
+          sha256sum prompt-refinery-*.tgz > SHA256SUMS
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Create GitHub release
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            "${{ steps.pack.outputs.tarball }}" \
+            SHA256SUMS \
+            --generate-notes \
+            --title "Prompt Refinery $GITHUB_REF_NAME"
+        env:
+          GH_TOKEN: ${{ github.token }}

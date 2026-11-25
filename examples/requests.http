@@ -1,0 +1,29 @@
+@base = http://127.0.0.1:4317
+
+### Health
+GET {{base}}/healthz
+
+### Capabilities
+GET {{base}}/v1/capabilities
+
+### Enhance a Chinese data task
+POST {{base}}/v1/enhance
+Content-Type: application/json
+
+{
+  "prompt": "把这份推广费用表分析一下，写份报告给领导汇报",
+  "target": "data",
+  "mode": "fast",
+  "locale": "zh-CN"
+}
+
+### Enhance an English agent task
+POST {{base}}/v1/enhance
+Content-Type: application/json
+
+{
+  "prompt": "Have the agent clean up my downloads folder and ask before deleting anything",
+  "target": "agent",
+  "mode": "balanced",
+  "locale": "en"
+}

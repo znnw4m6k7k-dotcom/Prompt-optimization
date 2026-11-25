@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://prompt-refinery.dev/schemas/enhance-input.schema.json",
+  "title": "Prompt Refinery enhance request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["prompt"],
+  "properties": {
+    "prompt": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 20000,
+      "description": "The rough request to rewrite."
+    },
+    "target": {
+      "type": "string",
+      "enum": ["auto", "general", "code", "writing", "research", "agent", "data", "image"],
+      "default": "auto"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["fast", "balanced", "quality"],
+      "default": "fast"
+    },
+    "locale": {
+      "type": "string",
+      "enum": ["auto", "zh-CN", "en"],
+      "default": "auto"
+    },
+    "maxChars": {
+      "type": "integer",
+      "minimum": 500,
+      "maximum": 60000,
+      "default": 12000
+    }
+  }
+}

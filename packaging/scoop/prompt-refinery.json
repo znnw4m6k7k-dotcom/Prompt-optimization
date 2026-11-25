@@ -1,0 +1,25 @@
+{
+  "version": "0.1.0",
+  "description": "Model-agnostic prompt compiler for desktop AI agents",
+  "homepage": "https://github.com/znnw4m6k7k-dotcom/Prompt-optimization",
+  "license": "Apache-2.0",
+  "depends": "nodejs",
+  "url": "https://registry.npmjs.org/prompt-refinery/-/prompt-refinery-0.1.0.tgz",
+  "hash": "REPLACE_WITH_NPM_TARBALL_SHA256",
+  "extract_dir": "package",
+  "bin": [
+    ["bin\\prompt-refinery.cmd", "prompt-refinery"],
+    ["bin\\prompt-refinery.cmd", "prfy"]
+  ],
+  "checkver": {
+    "url": "https://registry.npmjs.org/prompt-refinery/latest",
+    "jsonpath": "$.version"
+  },
+  "autoupdate": {
+    "url": "https://registry.npmjs.org/prompt-refinery/-/prompt-refinery-$version.tgz",
+    "hash": {
+      "url": "https://registry.npmjs.org/prompt-refinery/-/prompt-refinery-$version.tgz",
+      "mode": "download"
+    }
+  }
+}
